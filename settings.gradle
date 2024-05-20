@@ -1,0 +1,5 @@
+rootProject.name = 'monitoring'
+include 'monitoring-domain'
+include 'monitoring-batch'
+include 'monitoring-api'
+
