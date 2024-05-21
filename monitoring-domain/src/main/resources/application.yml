@@ -1,0 +1,13 @@
+monitoring:
+  cache:
+    time_delimiter: /
+
+
+
+spring:
+  data:
+    redis:
+      host:
+      port:
+      repositories:
+        enabled:
