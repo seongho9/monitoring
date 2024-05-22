@@ -17,5 +17,5 @@ public interface CacheRepository {
     Long countByDomain(String domain);
 
     void delete(CachedDataDTO cachedDataDTO);
-    void deleteByDomain(String domain);
+    boolean deleteByDomain(String domain);
 }

@@ -1,11 +1,10 @@
 package com.fishingboat.monitoring.domain.cache.repository;
 
+import com.fishingboat.monitoring.domain.cache.config.MonitoringConfig;
 import com.fishingboat.monitoring.domain.cache.dto.CachedDataDTO;
-import com.fishingboat.monitoring.domain.cache.exception.CacheDeletionFailedException;
 import com.fishingboat.monitoring.domain.cache.vo.ValueVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Repository;
@@ -17,25 +16,26 @@ import java.util.stream.Collectors;
 @Repository
 public class CacheRepositoryRedis implements CacheRepository {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> _RedisTemplate;
     private final String delimiter;
 
     public CacheRepositoryRedis(
             @Autowired RedisTemplate<String, String> redisTemplate,
-            @Value("${monitoring.cache.time_delimiter}") String delimiter
+            @Autowired MonitoringConfig monitoringInfo
             ) {
-        this.redisTemplate = redisTemplate;
-        this.delimiter = delimiter;
+        this._RedisTemplate = redisTemplate;
+        this.delimiter = monitoringInfo.getDelimiter();
     }
 
     @Override
     public void save(CachedDataDTO cachedDataDTO) {
-        redisTemplate.opsForValue().set(cachedDataDTO.getKey(), cachedDataDTO.getValue());
+        cachedDataDTO.setDelimiter(delimiter);
+        _RedisTemplate.opsForValue().set(cachedDataDTO.getKey(), cachedDataDTO.getValue());
     }
 
     @Override
     public Optional<ValueVO> findById(String id) {
-        String value = redisTemplate.opsForValue().get(id);
+        String value = _RedisTemplate.opsForValue().get(id);
 
         if(value == null){
             return Optional.empty();
@@ -53,7 +53,7 @@ public class CacheRepositoryRedis implements CacheRepository {
         ThreadLocal<List<ValueVO>> valueLocal = ThreadLocal.withInitial(ArrayList::new);
 
         valueLocal.set(
-                redisTemplate.execute((RedisCallback<List<ValueVO>>) connection -> {
+                _RedisTemplate.execute((RedisCallback<List<ValueVO>>) connection -> {
                     ScanOptions opt = ScanOptions.scanOptions().match(domain + "*").build();
                     Cursor<byte[]> cursor = connection.keyCommands().scan(opt);
 
@@ -78,7 +78,7 @@ public class CacheRepositoryRedis implements CacheRepository {
     public Long countByDomain(String domain) {
         ThreadLocal<Long> key = ThreadLocal.withInitial(() -> 0L);
 
-        redisTemplate.execute((RedisCallback<Object>) connection -> {
+        _RedisTemplate.execute((RedisCallback<Object>) connection -> {
             ScanOptions opt = ScanOptions.scanOptions().match(domain + "*").build();
             Cursor<byte[]> cursor = connection.keyCommands().scan(opt);
 
@@ -97,16 +97,16 @@ public class CacheRepositoryRedis implements CacheRepository {
     public void delete(CachedDataDTO cachedDataDTO) {
         log.info("id : {}", cachedDataDTO.getKey());
 
-        redisTemplate.delete(cachedDataDTO.getKey());
+        _RedisTemplate.delete(cachedDataDTO.getKey());
     }
 
     @Override
-    public void deleteByDomain(String domain) {
+    public boolean deleteByDomain(String domain) {
         ThreadLocal<Set<String>> keyLocal = ThreadLocal.withInitial(TreeSet::new);
 
         //domain 해당하는 key 값들 가져오기
         keyLocal.set(
-                redisTemplate.execute((RedisCallback<Set>) connection -> {
+                _RedisTemplate.execute((RedisCallback<Set>) connection -> {
                     ScanOptions opt = ScanOptions.scanOptions().match(domain + "*").build();
                     Cursor<byte[]> cursor = connection.keyCommands().scan(opt);
 
@@ -116,19 +116,21 @@ public class CacheRepositoryRedis implements CacheRepository {
 
         // 삭제는 1개의 트랜젝션 안에서
         // 트랜젝션 내에서는 scan 불가능
-        redisTemplate.execute(new SessionCallback<List<Boolean>>() {
+        List<Boolean> executed = _RedisTemplate.execute(new SessionCallback<List<Boolean>>() {
             @Override
             public <K, V> List<Boolean> execute(RedisOperations<K, V> operations) throws DataAccessException {
-                operations.multi();
-                List<Boolean> valList = keyLocal.get().stream().map(key -> redisTemplate.delete(key))
-                        .collect(Collectors.toList());
-                operations.exec();
 
-                if (valList.stream().anyMatch(val->val.equals(true))){
-                    throw new CacheDeletionFailedException("All Data are not Deleted");
-                }
-                return null;
+                List<Boolean> valList = keyLocal.get().stream().map(key -> operations.delete((K) key))
+                        .collect(Collectors.toList());
+
+                return valList;
             }
         });
+        if(executed.stream().anyMatch(val -> val.equals(true))){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
 }
