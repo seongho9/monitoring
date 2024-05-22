@@ -9,15 +9,14 @@ import org.springframework.beans.factory.annotation.Value;
 @Builder
 public class CachedDataDTO {
 
-    @Value("${monitoring.cache.time_delimiter}")
     private String delimiter;
-
     private String domain;
     private String time;
     private String value;
 
     public String getKey(){
-        return this.domain+this.delimiter+this.time;
+
+        return String.format("%s%s%s", this.domain, this.delimiter,this.time);
     }
 
     public String getValue(){
