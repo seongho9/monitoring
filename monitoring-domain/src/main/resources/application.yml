@@ -1,13 +1,21 @@
 monitoring:
-  cache:
-    time_delimiter: /
+  delimiter: /
 
 
 
 spring:
   data:
     redis:
-      host:
-      port:
-      repositories:
-        enabled:
+      cluster:
+        max-redirects: 5
+        password:
+        connect-ip: 192.168.0.5
+        #Millis
+        refresh_period: 30000
+        nodes:
+          - 192.168.0.5:7001
+          - 192.168.0.5:7002
+          - 192.168.0.5:7003
+          - 192.168.0.5:7004
+          - 192.168.0.5:7005
+          - 192.168.0.5:7006
