@@ -28,49 +28,5 @@ import java.time.Duration;
 public class Config {
 
     private final RedisConfig _RedisInfo;
-
-    @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-
-        RedisClusterConfiguration redisClusterConfiguration = new RedisClusterConfiguration(_RedisInfo.getNodes());
-        redisClusterConfiguration.setPassword(_RedisInfo.getPassword());
-        redisClusterConfiguration.setMaxRedirects(_RedisInfo.getMaxRedirects());
-
-        ClusterTopologyRefreshOptions clusterTopologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
-                .enableAllAdaptiveRefreshTriggers()
-                .enablePeriodicRefresh(Duration.ofMillis(_RedisInfo.getRefreshPeriod()))
-                .build();
-        ClusterClientOptions clientOptions = ClusterClientOptions.builder()
-                .topologyRefreshOptions(clusterTopologyRefreshOptions)
-                .build();
-
-        MappingSocketAddressResolver resolver = MappingSocketAddressResolver.create(DnsResolver.unresolved(),
-                hostAndPort -> {
-                    HostAndPort andPort = HostAndPort.of(_RedisInfo.getConnectIp(), hostAndPort.getPort());
-                    return andPort;
-                });
-        ClientResources clientResources = ClientResources.builder()
-                .socketAddressResolver(resolver)
-                .build();
-
-        LettuceClientConfiguration clientConfiguration = LettuceClientConfiguration.builder()
-                .clientOptions(clientOptions)
-                .clientResources(clientResources)
-                .readFrom(ReadFrom.REPLICA_PREFERRED)
-                .build();
-
-        LettuceConnectionFactory factory = new LettuceConnectionFactory(redisClusterConfiguration, clientConfiguration);
-
-        return factory;
-    }
-
-    @Bean
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(connectionFactory);
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
-
-        return redisTemplate;
-    }
+    private final MonitoringConfig _MonitoringInfo;
 }
