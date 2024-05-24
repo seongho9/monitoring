@@ -116,7 +116,7 @@ public class CacheRepositoryRedis implements CacheRepository {
 
         // 삭제는 1개의 트랜젝션 안에서
         // 트랜젝션 내에서는 scan 불가능
-        List<Boolean> executed = _RedisTemplate.execute(new SessionCallback<List<Boolean>>() {
+        List<Boolean> executedList = _RedisTemplate.execute(new SessionCallback<List<Boolean>>() {
             @Override
             public <K, V> List<Boolean> execute(RedisOperations<K, V> operations) throws DataAccessException {
 
@@ -126,7 +126,7 @@ public class CacheRepositoryRedis implements CacheRepository {
                 return valList;
             }
         });
-        if(executed.stream().anyMatch(val -> val.equals(true))){
+        if(executedList.stream().anyMatch(executed -> executed.equals(true))){
             return false;
         }
         else{
