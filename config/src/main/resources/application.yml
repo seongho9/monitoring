@@ -1,7 +1,12 @@
 monitoring:
   delimiter: /
-
-
+  pull-data:
+    pull-request-list:
+      - name:
+        base-url:
+        path:
+        unit:
+        interval:
 
 spring:
   data:
@@ -19,3 +24,9 @@ spring:
           - 192.168.0.5:7004
           - 192.168.0.5:7005
           - 192.168.0.5:7006
+  web:
+    rest-template:
+      max-connection: 100
+      connection-per-route: 20
+      evict-idle-connections: 60000
+      session-timeout: 10000
