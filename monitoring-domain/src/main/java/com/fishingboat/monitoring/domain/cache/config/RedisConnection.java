@@ -1,5 +1,7 @@
 package com.fishingboat.monitoring.domain.cache.config;
 
+import com.fishingboat.config.domain.DomainConfig;
+import com.fishingboat.config.domain.RedisConfig;
 import io.lettuce.core.ReadFrom;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
@@ -7,7 +9,6 @@ import io.lettuce.core.internal.HostAndPort;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DnsResolver;
 import io.lettuce.core.resource.MappingSocketAddressResolver;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,8 +25,8 @@ import java.time.Duration;
 public class RedisConnection {
     private final RedisConfig _RedisInfo;
 
-    public RedisConnection(@Autowired Config config) {
-        this._RedisInfo = config.get_RedisInfo();
+    public RedisConnection(@Autowired DomainConfig domainConfig) {
+        this._RedisInfo = domainConfig.get_RedisInfo();
     }
 
     @Bean

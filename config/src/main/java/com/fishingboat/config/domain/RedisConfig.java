@@ -1,4 +1,4 @@
-package com.fishingboat.monitoring.domain.cache.config;
+package com.fishingboat.config.domain;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

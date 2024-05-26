@@ -1,6 +1,6 @@
 package com.fishingboat.monitoring.domain.cache.repository;
 
-import com.fishingboat.monitoring.domain.cache.config.MonitoringConfig;
+import com.fishingboat.config.domain.DomainConfig;
 import com.fishingboat.monitoring.domain.cache.dto.CachedDataDTO;
 import com.fishingboat.monitoring.domain.cache.vo.ValueVO;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +21,10 @@ public class CacheRepositoryRedis implements CacheRepository {
 
     public CacheRepositoryRedis(
             @Autowired RedisTemplate<String, String> redisTemplate,
-            @Autowired MonitoringConfig monitoringInfo
+            @Autowired DomainConfig domainConfig
             ) {
         this._RedisTemplate = redisTemplate;
-        this.delimiter = monitoringInfo.getDelimiter();
+        this.delimiter = domainConfig.get_MonitoringInfo().getDelimiter();
     }
 
     @Override
@@ -113,6 +113,7 @@ public class CacheRepositoryRedis implements CacheRepository {
                     return cursor.stream().map(String::new).collect(Collectors.toSet());
                 })
         );
+
 
         // 삭제는 1개의 트랜젝션 안에서
         // 트랜젝션 내에서는 scan 불가능
