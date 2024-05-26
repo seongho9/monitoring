@@ -1,4 +1,4 @@
-package com.fishingboat.monitoring.domain.cache.config;
+package com.fishingboat.config.domain;
 
 import io.lettuce.core.ReadFrom;
 import io.lettuce.core.cluster.ClusterClientOptions;
@@ -10,7 +10,6 @@ import io.lettuce.core.resource.MappingSocketAddressResolver;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -19,13 +18,11 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.time.Duration;
-
 @Data
 @RequiredArgsConstructor
 @Configuration
 @Slf4j
-public class Config {
+public class DomainConfig {
 
     private final RedisConfig _RedisInfo;
     private final MonitoringConfig _MonitoringInfo;

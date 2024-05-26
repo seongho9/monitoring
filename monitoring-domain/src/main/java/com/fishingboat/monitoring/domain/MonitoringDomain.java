@@ -7,6 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MonitoringDomain {
     public static void main(String[] args) {
 
-        SpringApplication.run(MonitoringDomain.class);
+        SpringApplication.run(MonitoringDomain.class, args);
     }
 }
