@@ -62,4 +62,11 @@ project(':monitoring-batch') {
 	jar { enabled=false }
 }
 
+project(':config'){
+	bootJar { enabled=false }
+	jar { enabled=false }
+}
+
+
+
 bootJar { enabled=false }
